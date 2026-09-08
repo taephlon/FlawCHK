@@ -278,6 +278,18 @@ FlawCHK distinguishes between:
 
 ---
 
+## 🤝 Contributing
+
+Contributions to FlawCHK are warmly welcomed! You can contribute by adding new hardening rules, expanding Linux kernel CVE intelligence entries, adding distribution adapters, or enhancing reporting output formats.
+
+Please read our step-by-step **[Contributor Guide (CONTRIBUTING.md)](CONTRIBUTING.md)** for detailed instructions on:
+- Writing custom rules with the `Rule` trait
+- Adding CVE entries with runtime exposure matching
+- Enhancing distribution adapters (Portage, apt, dnf, pacman, apk, etc.)
+- Development, testing, and PR conventions
+
+---
+
 ## 📄 License
 
 FlawCHK is licensed under **MIT OR Apache-2.0**.
