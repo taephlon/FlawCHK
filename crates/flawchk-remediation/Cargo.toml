@@ -1,0 +1,11 @@
+[package]
+name = "flawchk-remediation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+flawchk-core = { path = "../flawchk-core" }
+flawchk-distro = { path = "../flawchk-distro" }
+colored.workspace = true
+thiserror.workspace = true

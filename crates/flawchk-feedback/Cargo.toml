@@ -1,0 +1,9 @@
+[package]
+name = "flawchk-feedback"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+flawchk-core = { path = "../flawchk-core" }
+colored.workspace = true

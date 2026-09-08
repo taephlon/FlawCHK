@@ -1,0 +1,30 @@
+[workspace]
+members = [
+    "crates/flawchk-core",
+    "crates/flawchk-distro",
+    "crates/flawchk-rules",
+    "crates/flawchk-feedback",
+    "crates/flawchk-report",
+    "crates/flawchk-remediation",
+    "crates/flawchk-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["FlawCHK Contributors"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/flawchk/flawchk"
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+toml = "0.8"
+clap = { version = "4.4", features = ["derive", "env"] }
+colored = "2.1"
+regex = "1.10"
+walkdir = "2.4"
+thiserror = "1.0"
+tracing = "0.1"

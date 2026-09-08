@@ -1,0 +1,4 @@
+name = "minimal"
+description = "High and Critical severity security checks only"
+categories = []
+min_severity = "HIGH"

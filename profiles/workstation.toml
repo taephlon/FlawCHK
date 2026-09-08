@@ -1,0 +1,3 @@
+name = "workstation"
+description = "Hardening profile suitable for Linux desktop/workstation nodes"
+categories = ["kernel", "users", "filesystem", "network"]

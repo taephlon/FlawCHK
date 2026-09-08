@@ -1,0 +1,4 @@
+name = "server"
+description = "Strict hardening profile tailored for production servers"
+categories = ["ssh", "kernel", "users", "filesystem", "network", "services", "logging", "mac"]
+min_severity = "LOW"

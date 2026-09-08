@@ -1,0 +1,21 @@
+[package]
+name = "flawchk-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "flawchk"
+path = "src/main.rs"
+
+[dependencies]
+flawchk-core = { path = "../flawchk-core" }
+flawchk-distro = { path = "../flawchk-distro" }
+flawchk-rules = { path = "../flawchk-rules" }
+flawchk-feedback = { path = "../flawchk-feedback" }
+flawchk-report = { path = "../flawchk-report" }
+flawchk-remediation = { path = "../flawchk-remediation" }
+clap.workspace = true
+colored.workspace = true
+serde_json.workspace = true
+chrono = "0.4"

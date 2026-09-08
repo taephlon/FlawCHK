@@ -1,0 +1,12 @@
+[package]
+name = "flawchk-distro"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+flawchk-core = { path = "../flawchk-core" }
+serde.workspace = true
+thiserror.workspace = true
+regex.workspace = true
+tracing.workspace = true
