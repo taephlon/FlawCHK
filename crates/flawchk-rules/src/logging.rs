@@ -37,50 +37,50 @@ impl Rule for AuditdLoggingRule {
         let is_syslog_active = platform.is_service_active("rsyslog") || platform.is_service_active("syslog-ng");
 
         if is_auditd_active {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "Kernel audit daemon (auditd) is active and running".to_string(),
-                explanation: "System event audit daemon is collecting security telemetry.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "Kernel audit daemon (auditd) is active and running".to_string(),
+                "System event audit daemon is collecting security telemetry.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else if is_journald_active || is_syslog_active {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "System logging (journald/syslog) is active, but auditd kernel event auditing is inactive".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "System logging (journald/syslog) is active, but auditd kernel event auditing is inactive".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "No active system audit daemon (auditd, journald, or syslog) detected".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "No active system audit daemon (auditd, journald, or syslog) detected".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }

@@ -33,39 +33,39 @@ impl Rule for UidZeroRule {
         let passwd_path = platform.resolve_config_path("passwd");
 
         if !platform.path_exists(&passwd_path) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Error,
-                evidence: "/etc/passwd file not found".to_string(),
-                explanation: "Cannot evaluate user accounts without /etc/passwd.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Error,
+                "/etc/passwd file not found".to_string(),
+                "Cannot evaluate user accounts without /etc/passwd.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&passwd_path) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Error reading /etc/passwd: {}", e),
-                    explanation: "Unable to parse user registry.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Error reading /etc/passwd: {}", e),
+                    "Unable to parse user registry.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
@@ -86,35 +86,35 @@ impl Rule for UidZeroRule {
         }
 
         if !uid0_users.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("Non-root accounts with UID 0 found: {}", uid0_users.join(", ")),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("Non-root accounts with UID 0 found: {}", uid0_users.join(", ")),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "Only 'root' has UID 0 in /etc/passwd".to_string(),
-                explanation: "No unauthorized UID 0 accounts were found.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "Only 'root' has UID 0 in /etc/passwd".to_string(),
+                "No unauthorized UID 0 accounts were found.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -144,39 +144,39 @@ impl Rule for EmptyPasswordShadowRule {
         let shadow_path = platform.resolve_config_path("shadow");
 
         if !platform.path_exists(&shadow_path) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::NotApplicable,
-                evidence: "Shadow file not found".to_string(),
-                explanation: "System does not use standard shadow file authentication.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::NotApplicable,
+                "Shadow file not found".to_string(),
+                "System does not use standard shadow file authentication.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&shadow_path) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Unable to read /etc/shadow: {}", e),
-                    explanation: "Root privileges are required to inspect /etc/shadow.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Unable to read /etc/shadow: {}", e),
+                    "Root privileges are required to inspect /etc/shadow.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
@@ -197,35 +197,35 @@ impl Rule for EmptyPasswordShadowRule {
         }
 
         if !empty_pass_users.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("Accounts with empty passwords found in /etc/shadow: {}", empty_pass_users.join(", ")),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("Accounts with empty passwords found in /etc/shadow: {}", empty_pass_users.join(", ")),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "No accounts with blank passwords detected in /etc/shadow".to_string(),
-                explanation: "All configured user accounts have encrypted password hashes or locked fields.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "No accounts with blank passwords detected in /etc/shadow".to_string(),
+                "All configured user accounts have encrypted password hashes or locked fields.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -255,39 +255,39 @@ impl Rule for PasswordMaxDaysRule {
         let login_defs = platform.resolve_config_path("login.defs");
 
         if !platform.path_exists(&login_defs) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::NotApplicable,
-                evidence: "/etc/login.defs not found".to_string(),
-                explanation: "System login.defs configuration not present.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::NotApplicable,
+                "/etc/login.defs not found".to_string(),
+                "System login.defs configuration not present.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&login_defs) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Error reading /etc/login.defs: {}", e),
-                    explanation: "Could not inspect login parameters.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Error reading /etc/login.defs: {}", e),
+                    "Could not inspect login parameters.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
@@ -306,48 +306,48 @@ impl Rule for PasswordMaxDaysRule {
         }
 
         match max_days {
-            Some(days) if days > 365 => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("PASS_MAX_DAYS is set to {} days (recommended <= 365)", days),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
-            Some(days) => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: format!("PASS_MAX_DAYS is configured to {} days", days),
-                explanation: "Password maximum lifetime is bounded.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
-            None => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "PASS_MAX_DAYS parameter is unset or unparseable in /etc/login.defs".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
+            Some(days) if days > 365 => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("PASS_MAX_DAYS is set to {} days (recommended <= 365)", days),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
+            Some(days) => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                format!("PASS_MAX_DAYS is configured to {} days", days),
+                "Password maximum lifetime is bounded.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
+            None => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "PASS_MAX_DAYS parameter is unset or unparseable in /etc/login.defs".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
         }
     }
 }

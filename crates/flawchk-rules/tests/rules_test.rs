@@ -80,6 +80,23 @@ impl PlatformAdapter for MockPlatform {
     fn path_exists(&self, path: &Path) -> bool {
         self.files.read().unwrap().contains_key(path)
     }
+
+    fn get_loaded_kernel_modules(&self) -> Vec<String> {
+        vec!["drbd".to_string(), "sunrpc".to_string(), "bluetooth".to_string()]
+    }
+
+    fn get_attack_surface(&self) -> flawchk_core::AttackSurface {
+        flawchk_core::AttackSurface {
+            listening_ports: self.get_listening_services(),
+            active_services: self.active_services.read().unwrap().clone(),
+            loaded_kernel_modules: self.get_loaded_kernel_modules(),
+            security_modules: vec!["OpenRC".to_string()],
+        }
+    }
+
+    fn get_distro_remediation_command(&self, package_name: &str) -> String {
+        format!("emerge -avuDN {}", package_name)
+    }
 }
 
 #[test]

@@ -12,6 +12,7 @@ path = "src/main.rs"
 flawchk-core = { path = "../flawchk-core" }
 flawchk-distro = { path = "../flawchk-distro" }
 flawchk-rules = { path = "../flawchk-rules" }
+flawchk-cve = { path = "../flawchk-cve" }
 flawchk-feedback = { path = "../flawchk-feedback" }
 flawchk-report = { path = "../flawchk-report" }
 flawchk-remediation = { path = "../flawchk-remediation" }

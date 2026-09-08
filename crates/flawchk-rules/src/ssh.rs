@@ -50,39 +50,39 @@ impl Rule for SshRootLoginRule {
         let sshd_path = platform.resolve_config_path("sshd_config");
 
         if !platform.path_exists(&sshd_path) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::NotApplicable,
-                evidence: format!("SSH configuration file not found at {}", sshd_path.display()),
-                explanation: "SSH daemon does not appear to be installed or configured on this node.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::NotApplicable,
+                format!("SSH configuration file not found at {}", sshd_path.display()),
+                "SSH daemon does not appear to be installed or configured on this node.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&sshd_path) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Failed to read {}: {}", sshd_path.display(), e),
-                    explanation: "Unable to inspect SSH configuration due to permission or file I/O error.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Failed to read {}: {}", sshd_path.display(), e),
+                    "Unable to inspect SSH configuration due to permission or file I/O error.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
@@ -90,44 +90,44 @@ impl Rule for SshRootLoginRule {
         let is_root_permitted = match val.as_deref() {
             Some("no") => false,
             Some("prohibit-password") | Some("without-password") => false,
-            Some("yes") | None => true, // OpenSSH default is often yes or prohibit-password depending on distro/version
+            Some("yes") | None => true,
             _ => true,
         };
 
         if is_root_permitted {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!(
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!(
                     "PermitRootLogin is currently set to '{}' in {}",
                     val.unwrap_or_else(|| "unset (defaulting to enabled/yes)".to_string()),
                     sshd_path.display()
                 ),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: format!("PermitRootLogin is securely set to '{}'", val.unwrap_or_default()),
-                explanation: "Direct root SSH authentication is properly restricted.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                format!("PermitRootLogin is securely set to '{}'", val.unwrap_or_default()),
+                "Direct root SSH authentication is properly restricted.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -157,39 +157,39 @@ impl Rule for SshPasswordAuthRule {
         let sshd_path = platform.resolve_config_path("sshd_config");
 
         if !platform.path_exists(&sshd_path) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::NotApplicable,
-                evidence: "SSH configuration not found".to_string(),
-                explanation: "SSH daemon is not installed.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::NotApplicable,
+                "SSH configuration not found".to_string(),
+                "SSH daemon is not installed.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&sshd_path) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Could not read {}: {}", sshd_path.display(), e),
-                    explanation: "Error reading SSH configuration.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Could not read {}: {}", sshd_path.display(), e),
+                    "Error reading SSH configuration.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
@@ -201,35 +201,35 @@ impl Rule for SshPasswordAuthRule {
         };
 
         if is_pass_auth_enabled {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("PasswordAuthentication is set to '{}'", val.unwrap_or_else(|| "unset (default yes)".to_string())),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("PasswordAuthentication is set to '{}'", val.unwrap_or_else(|| "unset (default yes)".to_string())),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "PasswordAuthentication is set to 'no'".to_string(),
-                explanation: "Password-based SSH authentication is disabled.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "PasswordAuthentication is set to 'no'".to_string(),
+                "Password-based SSH authentication is disabled.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -259,78 +259,78 @@ impl Rule for SshEmptyPasswordsRule {
         let sshd_path = platform.resolve_config_path("sshd_config");
 
         if !platform.path_exists(&sshd_path) {
-            return Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::NotApplicable,
-                evidence: "SSH configuration not found".to_string(),
-                explanation: "SSH daemon is not installed.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            };
+            return Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::NotApplicable,
+                "SSH configuration not found".to_string(),
+                "SSH daemon is not installed.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            );
         }
 
         let content = match platform.read_file(&sshd_path) {
             Ok(c) => c,
             Err(e) => {
-                return Finding {
-                    check_id: meta.id,
-                    title: meta.title,
-                    category: meta.category,
-                    severity: meta.severity,
-                    confidence: meta.confidence,
-                    status: Status::Error,
-                    evidence: format!("Could not read {}: {}", sshd_path.display(), e),
-                    explanation: "Error reading SSH configuration.".to_string(),
-                    remediation: meta.remediation,
-                    verification: meta.verification,
-                    caveats: meta.caveats,
-                    references: meta.references,
-                };
+                return Finding::hardening(
+                    meta.id,
+                    meta.title,
+                    meta.category,
+                    meta.severity,
+                    meta.confidence,
+                    Status::Error,
+                    format!("Could not read {}: {}", sshd_path.display(), e),
+                    "Error reading SSH configuration.".to_string(),
+                    meta.remediation,
+                    meta.verification,
+                    meta.caveats,
+                    meta.references,
+                );
             }
         };
 
         let val = parse_sshd_directive(&content, "PermitEmptyPasswords");
         let allows_empty = match val.as_deref() {
             Some("yes") => true,
-            _ => false, // default in OpenSSH is no
+            _ => false,
         };
 
         if allows_empty {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "PermitEmptyPasswords is set to 'yes'".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "PermitEmptyPasswords is set to 'yes'".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: format!("PermitEmptyPasswords is set to '{}'", val.unwrap_or_else(|| "no (default)".to_string())),
-                explanation: "Empty SSH passwords are forbidden.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                format!("PermitEmptyPasswords is set to '{}'", val.unwrap_or_else(|| "no (default)".to_string())),
+                "Empty SSH passwords are forbidden.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }

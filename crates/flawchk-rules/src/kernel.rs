@@ -33,51 +33,51 @@ impl Rule for KernelIpForwardRule {
         match platform.read_sysctl("net.ipv4.ip_forward") {
             Ok(val) => {
                 if val == "1" {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Fail,
-                        evidence: "net.ipv4.ip_forward is set to 1".to_string(),
-                        explanation: meta.impact,
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Fail,
+                        "net.ipv4.ip_forward is set to 1".to_string(),
+                        meta.impact,
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 } else {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Pass,
-                        evidence: format!("net.ipv4.ip_forward is set to {}", val),
-                        explanation: "IPv4 packet forwarding is disabled.".to_string(),
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Pass,
+                        format!("net.ipv4.ip_forward is set to {}", val),
+                        "IPv4 packet forwarding is disabled.".to_string(),
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 }
             }
-            Err(e) => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Error,
-                evidence: format!("Failed to read sysctl net.ipv4.ip_forward: {}", e),
-                explanation: "Unable to query kernel parameter.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
+            Err(e) => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Error,
+                format!("Failed to read sysctl net.ipv4.ip_forward: {}", e),
+                "Unable to query kernel parameter.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
         }
     }
 }
@@ -107,51 +107,51 @@ impl Rule for KernelIcmpRedirectRule {
         match platform.read_sysctl("net.ipv4.conf.all.accept_redirects") {
             Ok(val) => {
                 if val != "0" {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Fail,
-                        evidence: format!("net.ipv4.conf.all.accept_redirects is set to {}", val),
-                        explanation: meta.impact,
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Fail,
+                        format!("net.ipv4.conf.all.accept_redirects is set to {}", val),
+                        meta.impact,
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 } else {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Pass,
-                        evidence: "net.ipv4.conf.all.accept_redirects is 0".to_string(),
-                        explanation: "ICMP redirect packets are ignored by the kernel.".to_string(),
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Pass,
+                        "net.ipv4.conf.all.accept_redirects is 0".to_string(),
+                        "ICMP redirect packets are ignored by the kernel.".to_string(),
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 }
             }
-            Err(e) => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Error,
-                evidence: format!("Failed to read sysctl: {}", e),
-                explanation: "Unable to query kernel parameter.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
+            Err(e) => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Error,
+                format!("Failed to read sysctl: {}", e),
+                "Unable to query kernel parameter.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
         }
     }
 }
@@ -181,51 +181,51 @@ impl Rule for KernelAslrRule {
         match platform.read_sysctl("kernel.randomize_va_space") {
             Ok(val) => {
                 if val != "2" {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Fail,
-                        evidence: format!("kernel.randomize_va_space is set to '{}' (expected 2)", val),
-                        explanation: meta.impact,
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Fail,
+                        format!("kernel.randomize_va_space is set to '{}' (expected 2)", val),
+                        meta.impact,
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 } else {
-                    Finding {
-                        check_id: meta.id,
-                        title: meta.title,
-                        category: meta.category,
-                        severity: meta.severity,
-                        confidence: meta.confidence,
-                        status: Status::Pass,
-                        evidence: "kernel.randomize_va_space is set to 2 (Full ASLR)".to_string(),
-                        explanation: "Address space layout randomization is fully enabled.".to_string(),
-                        remediation: meta.remediation,
-                        verification: meta.verification,
-                        caveats: meta.caveats,
-                        references: meta.references,
-                    }
+                    Finding::hardening(
+                        meta.id,
+                        meta.title,
+                        meta.category,
+                        meta.severity,
+                        meta.confidence,
+                        Status::Pass,
+                        "kernel.randomize_va_space is set to 2 (Full ASLR)".to_string(),
+                        "Address space layout randomization is fully enabled.".to_string(),
+                        meta.remediation,
+                        meta.verification,
+                        meta.caveats,
+                        meta.references,
+                    )
                 }
             }
-            Err(e) => Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Error,
-                evidence: format!("Failed to read ASLR parameter: {}", e),
-                explanation: "Could not inspect kernel parameter.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            },
+            Err(e) => Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Error,
+                format!("Failed to read ASLR parameter: {}", e),
+                "Could not inspect kernel parameter.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            ),
         }
     }
 }

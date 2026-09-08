@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
-use crate::finding::Finding;
+use crate::finding::{Finding, FindingKind};
 use crate::severity::Severity;
+use crate::exposure::ExposureLevel;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SystemInfo {
@@ -20,6 +21,16 @@ pub struct AssessmentSummary {
     pub medium_count: usize,
     pub low_count: usize,
     pub info_count: usize,
+
+    pub hardening_fails: usize,
+    pub vulnerability_fails: usize,
+    pub exposure_fails: usize,
+
+    pub exposure_critical: usize,
+    pub exposure_high: usize,
+    pub exposure_medium: usize,
+    pub exposure_low: usize,
+
     pub pass_count: usize,
     pub fail_count: usize,
     pub na_count: usize,
@@ -35,6 +46,16 @@ impl AssessmentSummary {
         let mut medium_count = 0;
         let mut low_count = 0;
         let mut info_count = 0;
+
+        let mut hardening_fails = 0;
+        let mut vulnerability_fails = 0;
+        let mut exposure_fails = 0;
+
+        let mut exposure_critical = 0;
+        let mut exposure_high = 0;
+        let mut exposure_medium = 0;
+        let mut exposure_low = 0;
+
         let mut pass_count = 0;
         let mut fail_count = 0;
         let mut na_count = 0;
@@ -46,6 +67,23 @@ impl AssessmentSummary {
                 crate::finding::Status::Pass => pass_count += 1,
                 crate::finding::Status::Fail => {
                     fail_count += 1;
+
+                    match f.kind {
+                        FindingKind::Hardening => hardening_fails += 1,
+                        FindingKind::Vulnerability => vulnerability_fails += 1,
+                        FindingKind::Exposure => exposure_fails += 1,
+                    }
+
+                    if let Some(ref exp) = f.exposure_analysis {
+                        match exp.level {
+                            ExposureLevel::Critical => exposure_critical += 1,
+                            ExposureLevel::High => exposure_high += 1,
+                            ExposureLevel::Medium => exposure_medium += 1,
+                            ExposureLevel::Low | ExposureLevel::Reduced => exposure_low += 1,
+                            ExposureLevel::None => {}
+                        }
+                    }
+
                     match f.severity {
                         Severity::Critical => critical_count += 1,
                         Severity::High => high_count += 1,
@@ -59,7 +97,7 @@ impl AssessmentSummary {
             }
         }
 
-        let status_text = if critical_count > 0 || high_count > 0 {
+        let status_text = if critical_count > 0 || high_count > 0 || exposure_critical > 0 || exposure_high > 0 {
             "NEEDS ATTENTION".to_string()
         } else if fail_count > 0 {
             "MINOR ISSUES FOUND".to_string()
@@ -74,6 +112,13 @@ impl AssessmentSummary {
             medium_count,
             low_count,
             info_count,
+            hardening_fails,
+            vulnerability_fails,
+            exposure_fails,
+            exposure_critical,
+            exposure_high,
+            exposure_medium,
+            exposure_low,
             pass_count,
             fail_count,
             na_count,

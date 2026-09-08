@@ -3,6 +3,7 @@ members = [
     "crates/flawchk-core",
     "crates/flawchk-distro",
     "crates/flawchk-rules",
+    "crates/flawchk-cve",
     "crates/flawchk-feedback",
     "crates/flawchk-report",
     "crates/flawchk-remediation",

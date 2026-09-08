@@ -4,6 +4,25 @@ use colored::*;
 
 use crate::check::Category;
 use crate::severity::{Confidence, Severity};
+use crate::exposure::ExposureAnalysis;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum FindingKind {
+    Hardening,
+    Vulnerability,
+    Exposure,
+}
+
+impl fmt::Display for FindingKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FindingKind::Hardening => write!(f, "HARDENING"),
+            FindingKind::Vulnerability => write!(f, "VULNERABILITY"),
+            FindingKind::Exposure => write!(f, "EXPOSURE"),
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
@@ -43,6 +62,7 @@ impl fmt::Display for Status {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Finding {
     pub check_id: String,
+    pub kind: FindingKind,
     pub title: String,
     pub category: Category,
     pub severity: Severity,
@@ -51,13 +71,50 @@ pub struct Finding {
     pub evidence: String,
     pub explanation: String,
     pub remediation: String,
+    pub distro_remediation: Option<String>,
     pub verification: String,
     pub caveats: Option<String>,
     pub references: Vec<String>,
+    pub cve_id: Option<String>,
+    pub exposure_analysis: Option<ExposureAnalysis>,
 }
 
 impl Finding {
     pub fn is_failed(&self) -> bool {
         matches!(self.status, Status::Fail)
+    }
+
+    pub fn hardening(
+        check_id: String,
+        title: String,
+        category: Category,
+        severity: Severity,
+        confidence: Confidence,
+        status: Status,
+        evidence: String,
+        explanation: String,
+        remediation: String,
+        verification: String,
+        caveats: Option<String>,
+        references: Vec<String>,
+    ) -> Self {
+        Self {
+            check_id,
+            kind: FindingKind::Hardening,
+            title,
+            category,
+            severity,
+            confidence,
+            status,
+            evidence,
+            explanation,
+            remediation,
+            distro_remediation: None,
+            verification,
+            caveats,
+            references,
+            cve_id: None,
+            exposure_analysis: None,
+        }
     }
 }

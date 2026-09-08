@@ -43,35 +43,35 @@ impl Rule for FirewallStatusRule {
         }
 
         if active_fw.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "No active host firewall service (nftables, iptables, ufw, firewalld) was detected".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "No active host firewall service (nftables, iptables, ufw, firewalld) was detected".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: format!("Active host firewall service detected: {}", active_fw.join(", ")),
-                explanation: "Host-based firewall daemon is active.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                format!("Active host firewall service detected: {}", active_fw.join(", ")),
+                "Host-based firewall daemon is active.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -108,36 +108,35 @@ impl Rule for UnrestrictedListeningServicesRule {
         }
 
         if wildcard_listeners.len() > 3 {
-            // High count of wildcard listeners
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("Detected {} services listening on wildcard 0.0.0.0 / :: interfaces", wildcard_listeners.len()),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("Detected {} services listening on wildcard 0.0.0.0 / :: interfaces", wildcard_listeners.len()),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: format!("Controlled number of wildcard listening sockets ({} detected)", wildcard_listeners.len()),
-                explanation: "Network listening sockets are appropriately restricted.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                format!("Controlled number of wildcard listening sockets ({} detected)", wildcard_listeners.len()),
+                "Network listening sockets are appropriately restricted.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }

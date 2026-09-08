@@ -193,6 +193,7 @@ dependencies = [
  "clap",
  "colored",
  "flawchk-core",
+ "flawchk-cve",
  "flawchk-distro",
  "flawchk-feedback",
  "flawchk-remediation",
@@ -213,6 +214,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "flawchk-cve"
+version = "0.1.0"
+dependencies = [
+ "flawchk-core",
+ "flawchk-distro",
+ "regex",
+ "serde",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
 name = "flawchk-distro"
 version = "0.1.0"
 dependencies = [
@@ -229,6 +242,7 @@ version = "0.1.0"
 dependencies = [
  "colored",
  "flawchk-core",
+ "flawchk-distro",
 ]
 
 [[package]]

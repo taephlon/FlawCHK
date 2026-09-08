@@ -41,7 +41,6 @@ impl Rule for WorldWritableSensitiveFilesRule {
             if platform.path_exists(&path) {
                 if let Ok(metadata) = fs::metadata(&path) {
                     let mode = metadata.permissions().mode();
-                    // World write bit is 0o002
                     if (mode & 0o002) != 0 {
                         world_writable.push(format!("{} (mode: {:o})", path.display(), mode & 0o777));
                     }
@@ -50,35 +49,35 @@ impl Rule for WorldWritableSensitiveFilesRule {
         }
 
         if !world_writable.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("World-writable sensitive system files found: {}", world_writable.join(", ")),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("World-writable sensitive system files found: {}", world_writable.join(", ")),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "No checked sensitive system files (/etc/passwd, shadow, sudoers, sshd_config) are world-writable".to_string(),
-                explanation: "Permissions on sensitive configuration files are appropriately restrictive.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "No checked sensitive system files (/etc/passwd, shadow, sudoers, sshd_config) are world-writable".to_string(),
+                "Permissions on sensitive configuration files are appropriately restrictive.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -136,7 +135,6 @@ impl Rule for TmpMountOptionsRule {
         }
 
         if !found_tmp_mount {
-            // Check /proc/mounts if fstab didn't specify /tmp explicitly
             let mounts_path = std::path::Path::new("/proc/mounts");
             if platform.path_exists(mounts_path) {
                 if let Ok(content) = platform.read_file(mounts_path) {
@@ -161,50 +159,50 @@ impl Rule for TmpMountOptionsRule {
         }
 
         if !found_tmp_mount {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: "/tmp is not mounted on a separate partition or tmpfs with secure flags".to_string(),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                "/tmp is not mounted on a separate partition or tmpfs with secure flags".to_string(),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else if !missing_opts.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("/tmp mount is missing recommended security options: {}", missing_opts.join(", ")),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("/tmp mount is missing recommended security options: {}", missing_opts.join(", ")),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "/tmp partition is securely mounted with nodev, nosuid, and noexec".to_string(),
-                explanation: "Hardening mount flags are active on /tmp.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "/tmp partition is securely mounted with nodev, nosuid, and noexec".to_string(),
+                "Hardening mount flags are active on /tmp.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }
@@ -264,35 +262,35 @@ impl Rule for SuidSgidBinariesRule {
         }
 
         if !suspicious_suid.is_empty() {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Fail,
-                evidence: format!("Non-standard SUID/SGID binaries found: {}", suspicious_suid.join(", ")),
-                explanation: meta.impact,
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Fail,
+                format!("Non-standard SUID/SGID binaries found: {}", suspicious_suid.join(", ")),
+                meta.impact,
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         } else {
-            Finding {
-                check_id: meta.id,
-                title: meta.title,
-                category: meta.category,
-                severity: meta.severity,
-                confidence: meta.confidence,
-                status: Status::Pass,
-                evidence: "No non-standard SUID/SGID executable binaries were detected in system binary paths".to_string(),
-                explanation: "SUID/SGID executables belong exclusively to standard privilege utilities.".to_string(),
-                remediation: meta.remediation,
-                verification: meta.verification,
-                caveats: meta.caveats,
-                references: meta.references,
-            }
+            Finding::hardening(
+                meta.id,
+                meta.title,
+                meta.category,
+                meta.severity,
+                meta.confidence,
+                Status::Pass,
+                "No non-standard SUID/SGID executable binaries were detected in system binary paths".to_string(),
+                "SUID/SGID executables belong exclusively to standard privilege utilities.".to_string(),
+                meta.remediation,
+                meta.verification,
+                meta.caveats,
+                meta.references,
+            )
         }
     }
 }

@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use flawchk_core::SystemInfo;
+use flawchk_core::{AttackSurface, SystemInfo};
 
 pub trait PlatformAdapter: Send + Sync {
     fn system_info(&self) -> SystemInfo;
@@ -12,6 +12,9 @@ pub trait PlatformAdapter: Send + Sync {
     fn is_package_installed(&self, package_name: &str) -> bool;
     fn get_listening_services(&self) -> Vec<String>;
     fn path_exists(&self, path: &Path) -> bool;
+    fn get_loaded_kernel_modules(&self) -> Vec<String>;
+    fn get_attack_surface(&self) -> AttackSurface;
+    fn get_distro_remediation_command(&self, package_name: &str) -> String;
 }
 
 #[derive(Debug, Clone)]
@@ -139,7 +142,6 @@ impl PlatformAdapter for HostPlatform {
 
     fn is_service_active(&self, service_name: &str) -> bool {
         if self.custom_root.is_some() {
-            // Simulated / target root execution fallback
             return false;
         }
 
@@ -161,7 +163,6 @@ impl PlatformAdapter for HostPlatform {
             }
         }
 
-        // Fallback: process check via pgrep
         if let Ok(out) = Command::new("pgrep").arg(service_name).output() {
             return !out.stdout.is_empty();
         }
@@ -216,6 +217,10 @@ impl PlatformAdapter for HostPlatform {
     }
 
     fn is_package_installed(&self, package_name: &str) -> bool {
+        if package_name.eq_ignore_ascii_case("linux-kernel") || package_name.eq_ignore_ascii_case("kernel") {
+            return true;
+        }
+
         if self.custom_root.is_some() {
             return false;
         }
@@ -271,5 +276,69 @@ impl PlatformAdapter for HostPlatform {
             path.to_path_buf()
         };
         resolved.exists()
+    }
+
+    fn get_loaded_kernel_modules(&self) -> Vec<String> {
+        let proc_modules = self.resolve_path("/proc/modules");
+        if proc_modules.exists() {
+            if let Ok(content) = fs::read_to_string(&proc_modules) {
+                return content
+                    .lines()
+                    .filter_map(|l| l.split_whitespace().next().map(|s| s.to_string()))
+                    .collect();
+            }
+        }
+
+        if let Ok(out) = Command::new("lsmod").output() {
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            return stdout
+                .lines()
+                .skip(1)
+                .filter_map(|l| l.split_whitespace().next().map(|s| s.to_string()))
+                .collect();
+        }
+
+        Vec::new()
+    }
+
+    fn get_attack_surface(&self) -> AttackSurface {
+        let listening = self.get_listening_services();
+        let loaded_mods = self.get_loaded_kernel_modules();
+        let mut active_services = Vec::new();
+
+        let common_daemons = [
+            "sshd", "cupsd", "cups", "ksmbd", "smbd", "nfsd", "nginx", "httpd",
+            "apache2", "dockerd", "containerd", "systemd-resolved", "auditd", "named",
+        ];
+
+        for d in &common_daemons {
+            if self.is_service_active(d) {
+                active_services.push(d.to_string());
+            }
+        }
+
+        let mut mac_mods = Vec::new();
+        if self.mac != "None / Standard DAC" {
+            mac_mods.push(self.mac.clone());
+        }
+
+        AttackSurface {
+            listening_ports: listening,
+            active_services,
+            loaded_kernel_modules: loaded_mods,
+            security_modules: mac_mods,
+        }
+    }
+
+    fn get_distro_remediation_command(&self, package_name: &str) -> String {
+        match self.os_id.as_str() {
+            "gentoo" => format!("emerge --sync && emerge -avuDN sys-kernel/gentoo-sources {}", package_name),
+            "ubuntu" | "debian" => format!("sudo apt update && sudo apt install --only-upgrade {}", package_name),
+            "fedora" | "rhel" | "centos" | "rocky" | "alma" => format!("sudo dnf upgrade {}", package_name),
+            "arch" | "manjaro" => format!("sudo pacman -Syu {}", package_name),
+            "alpine" => format!("apk update && apk upgrade {}", package_name),
+            "void" => format!("xbps-install -Su {}", package_name),
+            _ => format!("Upgrade package '{}' using system package manager", package_name),
+        }
     }
 }

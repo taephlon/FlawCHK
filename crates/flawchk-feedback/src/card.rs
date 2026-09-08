@@ -1,6 +1,12 @@
 use flawchk_core::Finding;
 use colored::*;
 
+pub fn render_progress_bar(percentage: u8) -> String {
+    let filled_count = (percentage as usize / 10).min(10);
+    let empty_count = 10 - filled_count;
+    format!("{}{} {}%", "█".repeat(filled_count), "░".repeat(empty_count), percentage)
+}
+
 pub fn render_finding_card(finding: &Finding, colorize: bool) -> String {
     let width = 60;
 
@@ -53,6 +59,14 @@ pub fn render_finding_card(finding: &Finding, colorize: bool) -> String {
     };
     out.push_str(&format!("│ Status:        {:<width_pad$} │\n", status_colored, width_pad = width - 19));
     out.push_str(&format!("│ Category:      {:<width_pad$} │\n", cat_str, width_pad = width - 19));
+    out.push_str(&format!("│ Kind:          {:<width_pad$} │\n", finding.kind.to_string(), width_pad = width - 19));
+
+    if let Some(ref exp) = finding.exposure_analysis {
+        let exp_badge = if colorize { exp.level.badge() } else { exp.level.plain_str().to_string() };
+        out.push_str(&format!("│ Exposure:      {:<width_pad$} │\n", exp_badge, width_pad = width - 19));
+        out.push_str(&format!("│ Score:         {:<width_pad$} │\n", render_progress_bar(exp.score_percentage), width_pad = width - 19));
+    }
+
     out.push_str(&format!("│ {:<width_pad$} │\n", "", width_pad = width - 4));
 
     // Section helper
@@ -89,6 +103,19 @@ pub fn render_finding_card(finding: &Finding, colorize: bool) -> String {
         out.push('\n');
     }
 
+    // Exposure Factors if available
+    if let Some(ref exp) = finding.exposure_analysis {
+        let factors_str = exp.factors.join("\n");
+        for l in format_section("Exposure Analysis", &factors_str) {
+            out.push_str(&l);
+            out.push('\n');
+        }
+        for l in format_section("Attack Path", &exp.attack_path_summary) {
+            out.push_str(&l);
+            out.push('\n');
+        }
+    }
+
     // Why it matters
     for l in format_section("Why it matters", &finding.explanation) {
         out.push_str(&l);
@@ -107,9 +134,9 @@ pub fn render_finding_card(finding: &Finding, colorize: bool) -> String {
         out.push('\n');
     }
 
-    // Caveats if any
+    // Caveats / Mitigations if any
     if let Some(ref cav) = finding.caveats {
-        for l in format_section("⚠️ Caveats", cav) {
+        for l in format_section("⚠️ Temporary Mitigation / Caveats", cav) {
             out.push_str(&l);
             out.push('\n');
         }
